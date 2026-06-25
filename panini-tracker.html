@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Panini Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #f5f4f0;
+  --white: #ffffff;
+  --ink: #111110;
+  --ink2: #444240;
+  --ink3: #999790;
+  --border: #e4e2db;
+  --yellow: #f5c842;
+  --yellow-bg: #fef8e0;
+  --red: #e8452a;
+  --red-bg: #fdeee9;
+  --green: #1cb87a;
+  --green-bg: #e5f9f1;
+  --blue: #2563eb;
+  --blue-bg: #eff4ff;
+  --radius: 18px;
+  --font: "Space Grotesk", system-ui, sans-serif;
+}
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font); min-height: 100vh;
+  max-width: 430px; margin: 0 auto; padding-bottom: 88px;
+}
+
+/* Header */
+.header {
+  background: var(--white); padding: 20px 20px 14px;
+  border-bottom: 1.5px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.header-top { display:flex; align-items:center; justify-content:space-between; }
+.logo { font-size:22px; font-weight:700; letter-spacing:-0.8px; line-height:1; }
+.logo-dot { color: var(--yellow); }
+.edition-pill {
+  background:var(--ink); color:var(--yellow);
+  font-size:10px; font-weight:700; padding:5px 10px;
+  border-radius:100px; letter-spacing:0.6px; text-transform:uppercase;
+}
+.header-sub { font-size:12px; color:var(--ink3); margin-top:4px; font-weight:500; }
+
+/* Tabs */
+.tabs {
+  display:flex; background:var(--white); padding:0 12px;
+  position:sticky; top:72px; z-index:90;
+  border-bottom:1.5px solid var(--border);
+}
+.tab {
+  flex:1; padding:12px 4px 10px; border:none; background:transparent;
+  color:var(--ink3); font-size:11px; font-weight:600; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  border-bottom:2.5px solid transparent; margin-bottom:-1.5px;
+  font-family:var(--font); transition:color 0.15s;
+}
+.tab svg { width:18px; height:18px; }
+.tab.active { color:var(--ink); border-bottom-color:var(--ink); }
+
+/* Pages */
+.page { display:none; padding:16px; }
+.page.active { display:block; }
+
+/* Section label */
+.slabel {
+  font-size:10px; font-weight:700; color:var(--ink3);
+  text-transform:uppercase; letter-spacing:0.7px; margin-bottom:10px; margin-top:4px;
+}
+
+/* Mode buttons */
+.mode-row {
+  display:flex; gap:5px; margin-bottom:14px;
+  background:var(--white); border-radius:14px;
+  padding:5px; border:1.5px solid var(--border);
+}
+.mode-btn {
+  flex:1; padding:8px 4px; border-radius:10px; border:none;
+  background:transparent; color:var(--ink3); font-size:11px; font-weight:600;
+  cursor:pointer; text-align:center; font-family:var(--font); transition:all 0.15s;
+}
+.mi { font-size:17px; display:block; margin-bottom:3px; }
+.mode-btn.active { background:var(--ink); color:var(--yellow); }
+
+/* Scan zone */
+.scan-zone {
+  background:var(--white); border:2px dashed var(--border);
+  border-radius:var(--radius); padding:36px 20px;
+  text-align:center; cursor:pointer; margin-bottom:12px;
+  position:relative; overflow:hidden; transition:border-color 0.15s;
+}
+.scan-zone:active { border-color:var(--ink); }
+.scan-zone.has-image { border-style:solid; border-color:var(--ink); padding:0; }
+.scan-zone img { width:100%; border-radius:calc(var(--radius) - 2px); display:block; max-height:260px; object-fit:cover; }
+.scan-zone input[type=file] { display:none; }
+.scan-cam { font-size:44px; line-height:1; margin-bottom:12px; }
+.scan-lbl { font-size:16px; font-weight:700; margin-bottom:4px; }
+.scan-sub { font-size:12px; color:var(--ink3); font-weight:500; }
+.scan-overlay {
+  position:absolute; inset:0; background:rgba(0,0,0,0.45);
+  display:flex; align-items:center; justify-content:center;
+  border-radius:calc(var(--radius) - 2px);
+}
+.scan-overlay-btn {
+  background:var(--white); color:var(--ink); border:none;
+  border-radius:100px; padding:9px 18px; font-size:13px;
+  font-weight:700; cursor:pointer; font-family:var(--font);
+}
+
+/* Buttons */
+.btn {
+  width:100%; padding:15px; border-radius:14px; border:none;
+  font-size:15px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  font-family:var(--font); transition:transform 0.1s, opacity 0.1s;
+}
+.btn:active { transform:scale(0.98); }
+.btn-primary { background:var(--ink); color:var(--yellow); }
+.btn-primary:disabled { opacity:0.3; cursor:not-allowed; transform:none; }
+.btn-outline { background:var(--white); color:var(--ink); border:1.5px solid var(--border); }
+.btn-yellow { background:var(--yellow); color:var(--ink); }
+.btn-sm { padding:9px 16px; font-size:12px; border-radius:100px; width:auto; }
+
+/* Chips */
+.chip { padding:4px 10px; border-radius:100px; font-size:11px; font-weight:700; }
+.ch-g { background:var(--green-bg); color:var(--green); }
+.ch-r { background:var(--red-bg); color:var(--red); }
+.ch-y { background:var(--yellow-bg); color:#9a6f00; }
+.ch-b { background:var(--blue-bg); color:var(--blue); }
+.chips { display:flex; flex-wrap:wrap; gap:5px; }
+.mini { padding:3px 8px; border-radius:100px; font-size:10px; font-weight:700; }
+
+/* Cards */
+.card {
+  background:var(--white); border-radius:var(--radius);
+  border:1.5px solid var(--border); padding:16px; margin-bottom:10px;
+}
+.card-title { font-size:13px; font-weight:700; margin-bottom:10px; }
+
+/* Stats */
+.stats-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+.stat-card {
+  background:var(--white); border-radius:14px;
+  border:1.5px solid var(--border); padding:14px 8px; text-align:center;
+}
+.stat-num { font-size:26px; font-weight:700; line-height:1; }
+.stat-num.g { color:var(--green); }
+.stat-num.r { color:var(--red); }
+.stat-num.y { color:#9a6f00; }
+.stat-label { font-size:10px; color:var(--ink3); margin-top:3px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; }
+
+/* Progress */
+.prog-card {
+  background:var(--ink); border-radius:var(--radius);
+  padding:18px; margin-bottom:12px; color:var(--white);
+}
+.prog-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; }
+.prog-title { font-size:14px; font-weight:600; opacity:0.6; }
+.prog-pct { font-size:32px; font-weight:700; color:var(--yellow); line-height:1; }
+.prog-track { background:rgba(255,255,255,0.12); border-radius:6px; height:6px; overflow:hidden; }
+.prog-fill { height:100%; border-radius:6px; background:var(--yellow); transition:width 0.7s cubic-bezier(.4,0,.2,1); }
+.prog-sub { font-size:11px; opacity:0.45; margin-top:8px; font-weight:500; }
+
+/* Result label */
+.rlabel { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--ink3); margin:10px 0 6px; }
+
+/* Friends */
+.friend-card {
+  background:var(--white); border-radius:var(--radius);
+  border:1.5px solid var(--border); padding:16px; margin-bottom:10px;
+}
+.friend-card.lit { border-color:var(--blue); background:var(--blue-bg); }
+.f-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.f-av {
+  width:42px; height:42px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; color:var(--ink);
+}
+.f-name { font-size:15px; font-weight:700; }
+.f-meta { font-size:11px; color:var(--ink3); margin-top:1px; font-weight:500; }
+.swap-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.swap-box {
+  background:var(--bg); border-radius:12px; padding:12px;
+  border:1.5px solid var(--border);
+}
+.swap-box-lbl { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--ink3); margin-bottom:4px; }
+.swap-n { font-size:28px; font-weight:700; line-height:1; margin-bottom:2px; }
+.swap-n.blue { color:var(--blue); }
+.swap-n.green { color:var(--green); }
+.swap-desc { font-size:10px; color:var(--ink3); font-weight:500; }
+
+/* Profile */
+.p-hero {
+  background:var(--ink); border-radius:var(--radius);
+  padding:20px; margin-bottom:12px; display:flex; align-items:center; gap:14px;
+}
+.p-av {
+  width:54px; height:54px; border-radius:50%;
+  background:var(--yellow); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; font-weight:700; color:var(--ink);
+}
+.p-name { font-size:18px; font-weight:700; color:var(--white); }
+.p-sub { font-size:11px; color:rgba(255,255,255,0.45); margin-top:2px; font-weight:500; }
+.code-display {
+  background:var(--bg); border:1.5px solid var(--border);
+  border-radius:12px; padding:12px 16px;
+  font-size:22px; font-weight:700; letter-spacing:3px; flex:1;
+}
+.hist-item {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 0; border-bottom:1px solid var(--border);
+}
+.hist-item:last-child { border-bottom:none; }
+.hist-icon { font-size:22px; flex-shrink:0; }
+.hist-title { font-size:13px; font-weight:600; }
+.hist-meta { font-size:11px; color:var(--ink3); margin-top:1px; font-weight:500; }
+.hist-stat { font-size:13px; font-weight:700; color:var(--green); margin-left:auto; }
+
+/* Inputs */
+input[type=text], select, textarea {
+  width:100%; padding:11px 14px; border-radius:12px;
+  border:1.5px solid var(--border); background:var(--bg);
+  color:var(--ink); font-size:14px; outline:none;
+  font-family:var(--font); font-weight:500; -webkit-appearance:none;
+}
+input:focus, select:focus { border-color:var(--ink); background:var(--white); }
+
+/* Export row */
+.export-row { display:flex; gap:8px; margin-bottom:12px; }
+.export-row .btn { flex:1; padding:11px; font-size:12px; }
+
+/* Empty */
+.empty { text-align:center; padding:48px 20px; }
+.empty-icon { font-size:44px; margin-bottom:12px; display:block; }
+.empty-text { font-size:14px; color:var(--ink3); line-height:1.6; font-weight:500; }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:100px; left:50%;
+  transform:translateX(-50%) translateY(12px);
+  background:var(--ink); color:var(--yellow);
+  padding:10px 20px; border-radius:100px;
+  font-size:13px; font-weight:700; opacity:0;
+  transition:all 0.25s; z-index:999; white-space:nowrap;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* Spinner */
+.spinner {
+  width:16px; height:16px; border:2.5px solid rgba(255,255,255,0.25);
+  border-top-color:var(--yellow); border-radius:50%;
+  animation:spin 0.7s linear infinite;
+  display:inline-block; vertical-align:middle; margin-right:6px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Bottom nav */
+.bottom-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:430px; background:var(--white);
+  border-top:1.5px solid var(--border); display:flex;
+  padding:8px 0 20px; z-index:100;
+}
+.nav-btn {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+  background:none; border:none; color:var(--ink3); font-size:10px; font-weight:600;
+  cursor:pointer; padding:4px 0; font-family:var(--font); transition:color 0.15s;
+  position:relative;
+}
+.nav-btn svg { width:22px; height:22px; }
+.nav-btn.active { color:var(--ink); }
+.nav-dot {
+  position:absolute; top:1px; right:calc(50% - 20px);
+  width:7px; height:7px; border-radius:50%;
+  background:var(--red); border:2px solid var(--white); display:none;
+}
+.nav-dot.show { display:block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">panini<span class="logo-dot">.</span>tracker</div>
+    <div class="edition-pill" id="editionBadge">WC 2026</div>
+  </div>
+  <div class="header-sub" id="headerSub">Scan &middot; collect &middot; swap with friends</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tab-scan" onclick="switchPage('scan')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Scan
+  </button>
+  <button class="tab" id="tab-collection" onclick="switchPage('collection')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>Collection
+  </button>
+  <button class="tab" id="tab-friends" onclick="switchPage('friends')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Swaps
+  </button>
+  <button class="tab" id="tab-profile" onclick="switchPage('profile')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- SCAN -->
+<div class="page active" id="page-scan">
+  <div class="slabel" style="margin-top:14px">Scan mode</div>
+  <div class="mode-row">
+    <button class="mode-btn active" id="mode-album" onclick="setMode('album')"><span class="mi">&#128214;</span>Album page</button>
+    <button class="mode-btn" id="mode-sticker" onclick="setMode('sticker')"><span class="mi">&#127991;</span>Single</button>
+    <button class="mode-btn" id="mode-pile" onclick="setMode('pile')"><span class="mi">&#128230;</span>Pile</button>
+  </div>
+  <div class="scan-zone" id="scanZone" onclick="triggerUpload()">
+    <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="handleImage(event)">
+    <div class="scan-cam">&#128247;</div>
+    <div class="scan-lbl">Tap to photograph</div>
+    <div class="scan-sub">Album pages &middot; single stickers &middot; swap piles</div>
+  </div>
+  <button class="btn btn-primary" id="analyseBtn" onclick="analyseImage()" disabled style="margin-bottom:12px">
+    &#128269; Analyse stickers
+  </button>
+  <div id="resultArea"></div>
+</div>
+
+<!-- COLLECTION -->
+<div class="page" id="page-collection">
+  <div class="stats-bar" style="margin-top:4px">
+    <div class="stat-card"><div class="stat-num g" id="statHave">0</div><div class="stat-label">Have</div></div>
+    <div class="stat-card"><div class="stat-num r" id="statMissing">672</div><div class="stat-label">Missing</div></div>
+    <div class="stat-card"><div class="stat-num y" id="statDups">0</div><div class="stat-label">Dupes</div></div>
+  </div>
+  <div class="prog-card">
+    <div class="prog-top">
+      <div class="prog-title">WC 2026 Album</div>
+      <div class="prog-pct" id="progressPct">0%</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="prog-sub" id="progressSub">0 of 672 stickers collected</div>
+  </div>
+  <div class="export-row">
+    <button class="btn btn-outline" onclick="exportCSV('missing')">&#8595; Missing CSV</button>
+    <button class="btn btn-outline" onclick="exportCSV('duplicates')">&#8595; Dupes CSV</button>
+  </div>
+  <div id="sectionList">
+    <div class="empty"><span class="empty-icon">&#128193;</span><div class="empty-text">No stickers yet.<br>Head to Scan to get started.</div></div>
+  </div>
+</div>
+
+<!-- FRIENDS / SWAPS -->
+<div class="page" id="page-friends">
+  <div class="card" style="margin-top:4px">
+    <div class="card-title">Add a friend</div>
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;font-weight:500">Paste their collector code to see swap matches instantly.</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="friendCodeInput" placeholder="e.g. ABC123" style="flex:1;text-transform:uppercase;letter-spacing:1px" oninput="this.value=this.value.toUpperCase()">
+      <button class="btn btn-primary btn-sm" onclick="addFriend()">Add</button>
+    </div>
+  </div>
+  <div id="friendsList">
+    <div class="empty"><span class="empty-icon">&#129306;</span><div class="empty-text">No friends added yet.<br>Share your code from the Profile tab.</div></div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="page" id="page-profile">
+  <div class="p-hero" style="margin-top:4px">
+    <div class="p-av" id="pAvatar">?</div>
+    <div>
+      <div class="p-name" id="pName">Your profile</div>
+      <div class="p-sub" id="pSub">Set up your collector profile</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Your details</div>
+    <div style="font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Name</div>
+    <input type="text" id="collectorName" placeholder="e.g. FC Sticker King" oninput="liveUpdateProfile()" style="margin-bottom:12px">
+    <div style="font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Edition</div>
+    <select id="editionSelect" onchange="liveUpdateProfile()">
+      <option value="WC 2026">FIFA World Cup 2026</option>
+      <option value="WC 2022">FIFA World Cup 2022</option>
+      <option value="EURO 2024">UEFA Euro 2024</option>
+      <option value="WC 2018">FIFA World Cup 2018</option>
+    </select>
+  </div>
+  <div class="card">
+    <div class="card-title">Your collector code</div>
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;font-weight:500">Share this so friends can find your swaps.</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="code-display" id="myCode">&#8212;</div>
+      <button class="btn btn-outline btn-sm" onclick="copyCode()">Copy</button>
+      <button class="btn btn-primary btn-sm" onclick="shareCode()">Share</button>
+    </div>
+  </div>
+  <div class="slabel">Scan history</div>
+  <div class="card" style="padding:4px 16px">
+    <div id="scanHistory"><div style="padding:16px 0;text-align:center;font-size:13px;color:var(--ink3);font-weight:500">No scans yet.</div></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+    <button class="btn btn-yellow" onclick="saveProfile()">Save profile</button>
+    <button class="btn btn-outline" onclick="clearData()" style="color:var(--red)">Reset collection</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-scan" onclick="switchPage('scan')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Scan
+  </button>
+  <button class="nav-btn" id="nav-collection" onclick="switchPage('collection')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>Collection
+  </button>
+  <button class="nav-btn" id="nav-friends" onclick="switchPage('friends')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+    <div class="nav-dot" id="swapDot"></div>Swaps
+  </button>
+  <button class="nav-btn" id="nav-profile" onclick="switchPage('profile')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
+  </button>
+</nav>
+
+<script>
+const TOTAL = 672;
+let scanMode = "album";
+let currentB64 = null;
+let myCode = null;
+let collection = { have:{}, duplicates:{}, missing:[] };
+let scanHistory = [];
+let profileData = { name:"", edition:"WC 2026" };
+let friends = [];
+
+async function storagePut(key,val,shared=false){try{return await window.storage.set(key,JSON.stringify(val),shared);}catch(e){return null;}}
+async function storageGet(key,shared=false){try{const r=await window.storage.get(key,shared);return r?JSON.parse(r.value):null;}catch(e){return null;}}
+
+function genCode(){
+  const seed=navigator.userAgent+screen.width+screen.colorDepth;
+  let hash=0; for(let i=0;i<seed.length;i++) hash=(hash*31+seed.charCodeAt(i))&0xffffffff;
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code="",h=Math.abs(hash);
+  for(let i=0;i<6;i++){code+=chars[h%chars.length];h=Math.floor(h/chars.length);}
+  return code;
+}
+
+async function init(){
+  try{let s=await storageGet("panini_mycode");myCode=s||genCode();await storagePut("panini_mycode",myCode);}catch(e){myCode=genCode();}
+  document.getElementById("myCode").textContent=myCode;
+  try{
+    const c=localStorage.getItem("panini_col");if(c)collection=JSON.parse(c);
+    const h=localStorage.getItem("panini_hist");if(h)scanHistory=JSON.parse(h);
+    const p=localStorage.getItem("panini_prof");
+    if(p){profileData=JSON.parse(p);document.getElementById("collectorName").value=profileData.name||"";document.getElementById("editionSelect").value=profileData.edition||"WC 2026";}
+    const f=localStorage.getItem("panini_friends");if(f)friends=JSON.parse(f);
+  }catch(e){}
+  await publishProfile();
+  updateStats();renderCollection();renderHistory();updateProfileHeader();renderFriends();
+}
+
+async function publishProfile(){
+  if(!myCode)return;
+  await storagePut("panini_user_"+myCode,{code:myCode,name:profileData.name||"Collector "+myCode,edition:profileData.edition,have:collection.have,duplicates:collection.duplicates,missing:collection.missing,haveCount:Object.keys(collection.have).length,dupCount:Object.keys(collection.duplicates).length,ts:Date.now()},true);
+}
+
+function saveLocal(){
+  try{localStorage.setItem("panini_col",JSON.stringify(collection));localStorage.setItem("panini_hist",JSON.stringify(scanHistory));localStorage.setItem("panini_friends",JSON.stringify(friends));}catch(e){}
+}
+
+function setMode(m){scanMode=m;["album","sticker","pile"].forEach(x=>document.getElementById("mode-"+x).classList.toggle("active",x===m));}
+
+function triggerUpload(){if(document.querySelector("#scanZone.has-image"))return;document.getElementById("fileInput").click();}
+
+function handleImage(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    currentB64=ev.target.result.split(",")[1];
+    const z=document.getElementById("scanZone");z.classList.add("has-image");
+    z.innerHTML="<img src=\""+ev.target.result+"\" alt=\"scan\"><div class=\"scan-overlay\"><button class=\"scan-overlay-btn\" onclick=\"retake(event)\">&#8617; Retake</button></div>";
+    document.getElementById("analyseBtn").disabled=false;document.getElementById("resultArea").innerHTML="";
+  };reader.readAsDataURL(file);
+}
+
+function retake(e){
+  e.stopPropagation();const z=document.getElementById("scanZone");z.classList.remove("has-image");
+  z.innerHTML="<input type=\"file\" id=\"fileInput\" accept=\"image/*\" capture=\"environment\" onchange=\"handleImage(event)\"><div class=\"scan-cam\">&#128247;</div><div class=\"scan-lbl\">Tap to photograph</div><div class=\"scan-sub\">Album pages &middot; single stickers &middot; swap piles</div>";
+  currentB64=null;document.getElementById("analyseBtn").disabled=true;document.getElementById("resultArea").innerHTML="";
+}
+
+async function analyseImage(){
+  if(!currentB64)return;
+  const btn=document.getElementById("analyseBtn");btn.disabled=true;
+  btn.innerHTML="<span class=\"spinner\"></span> Analysing&#8230;";
+  const modeDesc={album:"Panini WC 2026 ALBUM PAGE. Identify all slots: filled vs empty. Note sticker numbers.",sticker:"Individual Panini sticker(s). Identify number(s) and team/player.",pile:"Pile of Panini stickers. Identify sticker numbers/teams visible."};
+  const sys="You are a Panini sticker album expert. Analyse the image and return ONLY valid JSON with no markdown:\n{\"mode\":\"album\",\"stickersFound\":[\"ENG1\"],\"stickersMissing\":[\"FRA-GK\"],\"duplicates\":[\"ENG1\"],\"summary\":\"1-2 sentence summary.\",\"confidence\":\"high\"}\n- stickersFound: filled slots or visible stickers\n- stickersMissing: empty slots (album mode only)\n- duplicates: stickers appearing more than once\n- Use exact codes; if unreadable use TEAM-ROLE\n- confidence: high/medium/low";
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:sys,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:currentB64}},{type:"text",text:modeDesc[scanMode]+"\n\nReturn only JSON."}]}]})});
+    const data=await res.json();const raw=data.content?.find(b=>b.type==="text")?.text||"";
+    let parsed;try{parsed=JSON.parse(raw.replace(/```json|```/g,"").trim());}catch(e){parsed={stickersFound:[],stickersMissing:[],duplicates:[],summary:"Could not parse. Try a clearer photo.",confidence:"low"};}
+    await processResult(parsed);
+  }catch(err){document.getElementById("resultArea").innerHTML="<div class=\"card\" style=\"margin-top:10px;border-color:var(--red)\"><div style=\"font-weight:700;color:var(--red);margin-bottom:4px\">Analysis failed</div><div style=\"font-size:12px;color:var(--ink3)\">"+err.message+"</div></div>";}
+  btn.disabled=false;btn.innerHTML="&#128269; Analyse stickers";
+}
+
+async function processResult(parsed){
+  const found=parsed.stickersFound||[],missing=parsed.stickersMissing||[],dups=parsed.duplicates||[];
+  found.forEach(s=>{if(collection.have[s]){collection.duplicates[s]=(collection.duplicates[s]||1)+1;}else{collection.have[s]=true;}});
+  dups.forEach(s=>{collection.duplicates[s]=(collection.duplicates[s]||1)+1;});
+  missing.forEach(s=>{if(!collection.have[s]&&!collection.missing.includes(s))collection.missing.push(s);});
+  collection.missing=collection.missing.filter(s=>!collection.have[s]);
+  const now=new Date();
+  scanHistory.unshift({mode:scanMode,date:now.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),time:now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}),found:found.length,missing:missing.length,dups:dups.length,summary:parsed.summary});
+  if(scanHistory.length>30)scanHistory.pop();
+  saveLocal();await publishProfile();updateStats();renderCollection();renderHistory();renderFriends();showResult(parsed,found,missing,dups);showToast("&#10003; "+found.length+" stickers added");
+}
+
+function showResult(parsed,found,missing,dups){
+  const cc={high:"var(--green)",medium:"#9a6f00",low:"var(--red)"}[parsed.confidence]||"var(--ink3)";
+  const cbg={high:"var(--green-bg)",medium:"var(--yellow-bg)",low:"var(--red-bg)"}[parsed.confidence]||"var(--bg)";
+  let h="<div class=\"card\" style=\"margin-top:10px\"><div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:8px\"><div style=\"font-size:14px;font-weight:700\">Result</div><span style=\"font-size:10px;font-weight:700;background:"+cbg+";color:"+cc+";padding:4px 10px;border-radius:100px\">"+(parsed.confidence||"?").toUpperCase()+"</span></div><div style=\"font-size:13px;color:var(--ink2);margin-bottom:12px;line-height:1.6;font-weight:500\">"+(parsed.summary||"")+"</div>";
+  if(found.length){h+="<div class=\"rlabel\">Found ("+found.length+")</div><div class=\"chips\" style=\"margin-bottom:8px\">";found.forEach(s=>h+="<span class=\"chip ch-g\">"+s+"</span>");h+="</div>";}
+  if(missing.length){h+="<div class=\"rlabel\">Missing slots ("+missing.length+")</div><div class=\"chips\" style=\"margin-bottom:8px\">";missing.slice(0,25).forEach(s=>h+="<span class=\"chip ch-r\">"+s+"</span>");if(missing.length>25)h+="<span class=\"chip ch-r\">+"+( missing.length-25)+"</span>";h+="</div>";}
+  if(dups.length){h+="<div class=\"rlabel\">Duplicates ("+dups.length+")</div><div class=\"chips\" style=\"margin-bottom:8px\">";dups.forEach(s=>h+="<span class=\"chip ch-y\">"+s+"</span>");h+="</div>";}
+  h+="<div class=\"export-row\" style=\"margin-top:10px;margin-bottom:0\"><button class=\"btn btn-outline\" style=\"font-size:12px;padding:10px\" onclick=\"switchPage('collection')\">View collection</button><button class=\"btn btn-outline\" style=\"font-size:12px;padding:10px\" onclick=\"exportCSV('all')\">&#8595; CSV</button></div></div>";
+  document.getElementById("resultArea").innerHTML=h;
+}
+
+function updateStats(){
+  const have=Object.keys(collection.have).length,dups=Object.keys(collection.duplicates).length,miss=Math.max(0,TOTAL-have),pct=Math.round(have/TOTAL*100);
+  document.getElementById("statHave").textContent=have;document.getElementById("statMissing").textContent=miss;document.getElementById("statDups").textContent=dups;
+  document.getElementById("progressPct").textContent=pct+"%";document.getElementById("progressFill").style.width=pct+"%";document.getElementById("progressSub").textContent=have+" of "+TOTAL+" stickers collected";
+}
+
+function renderCollection(){
+  const haveList=Object.keys(collection.have),dupList=Object.keys(collection.duplicates),missList=collection.missing;
+  const el=document.getElementById("sectionList");
+  if(!haveList.length&&!missList.length){el.innerHTML="<div class=\"empty\"><span class=\"empty-icon\">&#128193;</span><div class=\"empty-text\">No stickers yet.<br>Head to Scan to get started.</div></div>";return;}
+  let h="";
+  if(haveList.length){h+="<div class=\"card\"><div class=\"card-title\">&#9989; Have &mdash; "+haveList.length+"</div><div class=\"chips\">";haveList.slice(0,60).forEach(s=>h+="<span class=\"mini ch-g\">"+s+"</span>");if(haveList.length>60)h+="<span class=\"mini ch-g\">+"+(haveList.length-60)+" more</span>";h+="</div></div>";}
+  if(dupList.length){h+="<div class=\"card\"><div class=\"card-title\">&#128257; Duplicates &mdash; "+dupList.length+"</div><div class=\"chips\">";dupList.forEach(s=>h+="<span class=\"mini ch-y\">"+s+" &times;"+(collection.duplicates[s]+1)+"</span>");h+="</div></div>";}
+  if(missList.length){h+="<div class=\"card\"><div class=\"card-title\">&#10060; Missing &mdash; "+missList.length+"</div><div class=\"chips\">";missList.slice(0,60).forEach(s=>h+="<span class=\"mini ch-r\">"+s+"</span>");if(missList.length>60)h+="<span class=\"mini ch-r\">+"+(missList.length-60)+" more</span>";h+="</div></div>";}
+  el.innerHTML=h;
+}
+
+async function addFriend(){
+  const input=document.getElementById("friendCodeInput"),code=input.value.trim().toUpperCase();
+  if(!code||code.length<4){showToast("Enter a valid code");return;}
+  if(code===myCode){showToast("That's your own code!");return;}
+  if(friends.includes(code)){showToast("Already added");return;}
+  const fp=await storageGet("panini_user_"+code,true);
+  if(!fp){showToast("Code not found &#8212; ask them to open the app first");return;}
+  friends.push(code);saveLocal();input.value="";renderFriends();showToast("&#10003; Added "+(fp.name||code));
+}
+
+async function renderFriends(){
+  const el=document.getElementById("friendsList");
+  if(!friends.length){el.innerHTML="<div class=\"empty\"><span class=\"empty-icon\">&#129306;</span><div class=\"empty-text\">No friends added yet.<br>Share your code from the Profile tab.</div></div>";document.getElementById("swapDot").classList.remove("show");return;}
+  let totalSwaps=0,html="";
+  for(const code of friends){
+    const fp=await storageGet("panini_user_"+code,true);
+    if(!fp){html+="<div class=\"friend-card\"><div style=\"font-size:13px;color:var(--ink3);font-weight:500\">&#9888; "+code+" &#8212; not available</div><button class=\"btn btn-outline btn-sm\" style=\"margin-top:8px\" onclick=\"removeFriend('"+code+"')\"">Remove</button></div>";continue;}
+    const iCanGive=Object.keys(collection.duplicates).filter(s=>(fp.missing||[]).includes(s)||!fp.have?.[s]);
+    const theyCanGive=Object.keys(fp.duplicates||{}).filter(s=>collection.missing.includes(s)||!collection.have[s]);
+    totalSwaps+=iCanGive.length+theyCanGive.length;
+    const initials=(fp.name||code).split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    const avColors=["#f5c842","#fca5a5","#86efac","#93c5fd","#d8b4fe","#fdba74"];
+    const ac=avColors[Math.abs(code.charCodeAt(0)+code.charCodeAt(1))%avColors.length];
+    const hasSwaps=iCanGive.length>0||theyCanGive.length>0;
+    html+="<div class=\"friend-card "+(hasSwaps?"lit":"")+"\"><div class=\"f-head\"><div class=\"f-av\" style=\"background:"+ac+"\">"+initials+"</div><div style=\"flex:1\"><div class=\"f-name\">"+(fp.name||code)+"</div><div class=\"f-meta\">"+(fp.edition||"WC 2026")+" &middot; "+(fp.haveCount||0)+" stickers &middot; "+code+"</div></div><button onclick=\"removeFriend('"+code+"')\" style=\"background:none;border:none;color:var(--ink3);font-size:18px;cursor:pointer;padding:2px\">&times;</button></div><div class=\"swap-grid\"><div class=\"swap-box\"><div class=\"swap-box-lbl\">I give them</div><div class=\"swap-n blue\">"+iCanGive.length+"</div><div class=\"swap-desc\">my dupes they need</div>"+(iCanGive.length?"<div class=\"chips\" style=\"margin-top:8px\">"+iCanGive.slice(0,6).map(s=>"<span class=\"mini ch-b\">"+s+"</span>").join("")+(iCanGive.length>6?"<span class=\"mini ch-b\">+"+(iCanGive.length-6)+"</span>":"")+"</div>":"")+"</div><div class=\"swap-box\"><div class=\"swap-box-lbl\">They give me</div><div class=\"swap-n green\">"+theyCanGive.length+"</div><div class=\"swap-desc\">their dupes I need</div>"+(theyCanGive.length?"<div class=\"chips\" style=\"margin-top:8px\">"+theyCanGive.slice(0,6).map(s=>"<span class=\"mini ch-g\">"+s+"</span>").join("")+(theyCanGive.length>6?"<span class=\"mini ch-g\">+"+(theyCanGive.length-6)+"</span>":"")+"</div>":"")+"</div></div>"+(hasSwaps?"<div style=\"display:flex;gap:8px;margin-top:12px\"><button class=\"btn btn-outline btn-sm\" onclick=\"exportSwapCSV('"+code+"',"+JSON.stringify(iCanGive)+","+JSON.stringify(theyCanGive)+")\"">&#8595; CSV</button><button class=\"btn btn-primary btn-sm\" onclick=\"shareSwaps('"+( fp.name||code)+"',"+JSON.stringify(iCanGive)+","+JSON.stringify(theyCanGive)+")\"">Share swaps</button></div>":"<div style=\"margin-top:10px;font-size:12px;color:var(--ink3);text-align:center;font-weight:500\">No matches yet &mdash; scan more stickers!</div>")+"</div>";
+  }
+  el.innerHTML=html;
+  document.getElementById("swapDot").classList.toggle("show",totalSwaps>0);
+}
+
+function removeFriend(code){friends=friends.filter(f=>f!==code);saveLocal();renderFriends();showToast("Friend removed");}
+
+function exportSwapCSV(code,iCanGive,theyCanGive){
+  const rows=[["Sticker ID","Direction","Note"]];
+  iCanGive.forEach(s=>rows.push([s,"I give them","My dupe → "+code+" needs"]));
+  theyCanGive.forEach(s=>rows.push([s,"They give me",code+" dupe → I need"]));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(",")).join("\n")],{type:"text/csv"}));a.download="swap_"+code+".csv";a.click();showToast("&#8595; Swap CSV downloaded");
+}
+
+function shareSwaps(name,iCanGive,theyCanGive){
+  const msg="&#127991; Panini swap with "+name+":\nI give: "+iCanGive.slice(0,10).join(", ")+(iCanGive.length>10?"…":"")+"\nThey give: "+theyCanGive.slice(0,10).join(", ")+(theyCanGive.length>10?"…":"");
+  if(navigator.share){navigator.share({title:"Panini Swap List",text:msg}).catch(()=>{});}
+  else{navigator.clipboard?.writeText(msg);showToast("Copied to clipboard!");}
+}
+
+function liveUpdateProfile(){profileData.name=document.getElementById("collectorName").value;profileData.edition=document.getElementById("editionSelect").value;updateProfileHeader();document.getElementById("editionBadge").textContent=profileData.edition;}
+
+function updateProfileHeader(){
+  const name=profileData.name||"Collector";
+  const initials=name.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2)||"?";
+  document.getElementById("pAvatar").textContent=initials;document.getElementById("pName").textContent=name;
+  const have=Object.keys(collection.have).length;
+  document.getElementById("pSub").textContent=have+" stickers · "+profileData.edition;
+  document.getElementById("headerSub").textContent=name?name+" · scan · collect · swap":"Scan · collect · swap with friends";
+}
+
+async function saveProfile(){liveUpdateProfile();localStorage.setItem("panini_prof",JSON.stringify(profileData));await publishProfile();showToast("&#10003; Profile saved");}
+function copyCode(){navigator.clipboard?.writeText(myCode).then(()=>showToast("Code copied!")).catch(()=>showToast(myCode));}
+function shareCode(){const msg="Join me on Panini Tracker! My collector code: "+myCode+" — add it to see which stickers we can swap.";if(navigator.share){navigator.share({title:"My Panini Code",text:msg}).catch(()=>{});}else{navigator.clipboard?.writeText(msg);showToast("Share text copied!");}}
+
+function renderHistory(){
+  const el=document.getElementById("scanHistory");
+  if(!scanHistory.length){el.innerHTML="<div style=\"padding:16px 0;text-align:center;font-size:13px;color:var(--ink3);font-weight:500\">No scans yet.</div>";return;}
+  const icons={album:"&#128214;",sticker:"&#127991;",pile:"&#128230;"};
+  el.innerHTML=scanHistory.map(h=>"<div class=\"hist-item\"><div class=\"hist-icon\">"+(icons[h.mode]||"&#128247;")+"</div><div style=\"flex:1\"><div class=\"hist-title\">"+h.date+" &middot; "+h.time+"</div><div class=\"hist-meta\">"+(h.summary||"+"+h.found+" found")+"</div></div><div class=\"hist-stat\">+"+h.found+"</div></div>").join("");
+}
+
+function exportCSV(type){
+  let rows,filename;
+  if(type==="missing"){rows=[["Sticker ID","Status"],...collection.missing.map(s=>[s,"Missing"])];filename="panini_missing.csv";}
+  else if(type==="duplicates"){rows=[["Sticker ID","Extra Copies","Status"],...Object.entries(collection.duplicates).map(([s,c])=>[s,c,"Duplicate"])];filename="panini_duplicates.csv";}
+  else{rows=[["Sticker ID","Status","Extra Copies"]];Object.keys(collection.have).forEach(s=>rows.push([s,collection.duplicates[s]?"Duplicate":"Have",collection.duplicates[s]||0]));collection.missing.forEach(s=>rows.push([s,"Missing",0]));filename="panini_collection.csv";}
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(",")).join("\n")],{type:"text/csv"}));a.download=filename;a.click();showToast("&#8595; "+filename);
+}
+
+function clearData(){if(!confirm("Reset all collection data? Cannot be undone."))return;collection={have:{},duplicates:{},missing:[]};scanHistory=[];saveLocal();publishProfile();updateStats();renderCollection();renderHistory();renderFriends();showToast("Collection reset");}
+
+function switchPage(p){
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab,.nav-btn").forEach(x=>x.classList.remove("active"));
+  document.getElementById("page-"+p).classList.add("active");
+  document.getElementById("tab-"+p)?.classList.add("active");
+  document.getElementById("nav-"+p)?.classList.add("active");
+  if(p==="profile")updateProfileHeader();
+  if(p==="friends")renderFriends();
+}
+
+function showToast(msg){const t=document.getElementById("toast");t.innerHTML=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2400);}
+
+init();
+</script>
+</body>
+</html>
